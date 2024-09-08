@@ -1,0 +1,28 @@
+services:
+    mikroip:
+        build:
+            context: .
+            dockerfile: Dockerfile
+            target: base
+        command: node dist/src/index.js
+        container_name: external_ip-mikroip
+        environment:
+            TZ: "Europe/Moscow"
+        restart: unless-stopped
+        networks:
+            - external
+            - traefik
+        labels:
+            - "traefik.enable=true"
+            - "traefik.docker.network=traefik"
+            - "traefik.http.routers.mikroip.rule=Host(`mikroip.lmrsc.su`)"
+            - "traefik.http.routers.mikroip.entrypoints=websecure"
+            - "traefik.http.routers.mikroip.tls.certresolver=letsEncrypt"
+            - "traefik.http.routers.mikroip.middlewares=traefik-compress"
+            - "traefik.http.services.mikroip.loadbalancer.server.port=3000"
+
+networks:
+    external:
+        external: true
+    traefik:
+        external: true
